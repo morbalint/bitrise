@@ -27,7 +27,9 @@ type StageListItemModel map[string]StageModel
 
 // StageModel ...
 type StageModel struct {
-	Workflows []WorkflowListItemModel `json:"workflows,omitempty" yaml:"workflows,omitempty"`
+	AbortOnFail     bool                    `json:"abort_on_fail" yaml:"abort_on_fail"`
+	ShouldAlwaysRun bool                    `json:"should_always_run" yaml:"should_always_run"`
+	Workflows       []WorkflowListItemModel `json:"workflows,omitempty" yaml:"workflows,omitempty"`
 }
 
 // WorkflowListItemModel ...
@@ -104,6 +106,7 @@ type BitriseDataModel struct {
 
 // StepIDData ...
 // structured representation of a composite-step-id
+//
 //	a composite step id is: step-lib-source::step-id@1.0.0
 type StepIDData struct {
 	// SteplibSource : steplib source uri, or in case of local path just "path", and in case of direct git url just "git"
@@ -213,10 +216,12 @@ func (s StepRunResultsModel) error() []StepError {
 		message = fmt.Sprintf("This Step failed, because it has not sent any output for %s.", formatStatusReasonTimeInterval(*s.StepInfo.Step.NoOutputTimeout))
 	}
 
-	return []StepError{{
-		Code:    s.ExitCode,
-		Message: message,
-	}}
+	return []StepError{
+		{
+			Code:    s.ExitCode,
+			Message: message,
+		},
+	}
 }
 
 func formatStatusReasonTimeInterval(timeInterval int) string {
